@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import bcrypt from 'bcryptjs';
 
 const UserSchema = new mongoose.Schema(
   {
@@ -17,8 +16,6 @@ const UserSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      minlength: [6, 'Password must be at least 6 characters'],
-      // No required:true — Google users won't have a password
     },
     role: {
       type: String,
@@ -37,26 +34,10 @@ const UserSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
-    googleId: {
-      type: String,
-    },
-    refreshToken: {
-      type: String,
-    },
+    googleId: String,
+    refreshToken: String,
   },
   { timestamps: true }
 );
-
-// Hash password before saving — only if it was changed
-UserSchema.pre('save', async function (next) {
-  if (!this.isModified('password') || !this.password) return next();
-  this.password = await bcrypt.hash(this.password, 12);
-  next();
-});
-
-// Method to compare passwords on login
-UserSchema.methods.comparePassword = async function (plainPassword) {
-  return bcrypt.compare(plainPassword, this.password);
-};
 
 export default mongoose.model('User', UserSchema);

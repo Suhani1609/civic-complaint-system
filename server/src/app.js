@@ -6,6 +6,8 @@ import cookieParser from 'cookie-parser';
 import mongoSanitize from 'express-mongo-sanitize';
 import { errorHandler } from './middleware/errorHandler.js';
 import authRoutes from './routes/auth.routes.js';
+import complaintRoutes from './routes/complaint.routes.js';
+import wardRoutes from './routes/ward.routes.js';
 
 const app = express();
 
@@ -22,7 +24,11 @@ if (process.env.NODE_ENV === 'development') {
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(mongoSanitize());
+app.use((req, res, next) => {
+  mongoSanitize.sanitize(req.body);
+  mongoSanitize.sanitize(req.params);
+  next();
+});
 
 // Health check — Render uses this to verify the server is alive
 app.get('/health', (req, res) => {
@@ -31,7 +37,8 @@ app.get('/health', (req, res) => {
 
 // Routes go here in later phases:
 app.use('/api/v1/auth', authRoutes);
-// app.use('/api/v1/complaints', complaintRoutes);
+app.use('/api/v1/complaints', complaintRoutes);
+app.use('/api/v1/wards', wardRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ success: false, message: `Route ${req.method} ${req.path} not found` });

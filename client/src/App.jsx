@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { useAuthStore } from './store/authStore';
 import api from './api/axios';
+import NewComplaint from './pages/citizen/NewComplaint';
 
 // Auth pages
 import LoginPage from './pages/auth/LoginPage';
@@ -78,6 +79,8 @@ function App() {
         <Route path="/login"  element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
       </Route>
+
+      <Route path="/new-complaint" element={<PrivateRoute><NewComplaint /></PrivateRoute>} />
 
       {/* Protected routes */}
       <Route path="/dashboard" element={<PrivateRoute><Placeholder name="Citizen Dashboard — Phase 4" /></PrivateRoute>} />
