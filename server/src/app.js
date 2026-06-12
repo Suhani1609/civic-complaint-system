@@ -8,6 +8,11 @@ import { errorHandler } from './middleware/errorHandler.js';
 import authRoutes from './routes/auth.routes.js';
 import complaintRoutes from './routes/complaint.routes.js';
 import wardRoutes from './routes/ward.routes.js';
+import analyticsRoutes from './routes/analytics.routes.js';
+import User from './models/User.js';
+import { asyncHandler } from './utils/apiError.js';
+import { verifyToken, requireRole } from './middleware/auth.middleware.js';
+import userRoutes from './routes/user.routes.js';
 
 const app = express();
 
@@ -39,6 +44,16 @@ app.get('/health', (req, res) => {
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/complaints', complaintRoutes);
 app.use('/api/v1/wards', wardRoutes);
+app.use('/api/v1/analytics', analyticsRoutes);
+app.use('/api/v1/users', userRoutes);
+app.get('/api/v1/users', verifyToken, requireRole('admin'),
+  asyncHandler(async (req, res) => {
+    const { role } = req.query;
+    const filter = role ? { role } : {};
+    const users = await User.find(filter).select('-password -refreshToken');
+    res.json({ success: true, users });
+  })
+);
 
 app.use((req, res) => {
   res.status(404).json({ success: false, message: `Route ${req.method} ${req.path} not found` });
