@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import api from '../../api/axios';
 import { useAuthStore } from '../../store/authStore';
+import { connectSocket } from '../../utils/socket';
 
 const SignupPage = () => {
   const navigate = useNavigate();
@@ -19,6 +20,7 @@ const SignupPage = () => {
         name: data.name, email: data.email, password: data.password,
       });
       setAuth(res.data.user, res.data.accessToken);
+      connectSocket(res.data.user._id);
       toast.success('Account created! Welcome 🎉');
       navigate('/dashboard');
     } catch (err) {

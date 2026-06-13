@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import api from '../../api/axios';
 import { useAuthStore } from '../../store/authStore';
+import { connectSocket } from '../../utils/socket';
 
 const getDashboard = (role) => {
   if (role === 'admin')        return '/admin';
@@ -23,6 +24,7 @@ const LoginPage = () => {
     try {
       const res = await api.post('/auth/login', data);
       setAuth(res.data.user, res.data.accessToken);
+      connectSocket(res.data.user._id);
       toast.success(`Welcome back, ${res.data.user.name.split(' ')[0]}!`);
       navigate(getDashboard(res.data.user.role));
     } catch (err) {

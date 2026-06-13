@@ -2,6 +2,7 @@ import Complaint from '../models/Complaint.js';
 import Ward from '../models/Ward.js';
 import { ApiError, asyncHandler } from '../utils/apiError.js';
 import { uploadToCloudinary } from '../config/cloudinary.js';
+import { createNotification } from '../utils/notify.js';
 
 // ── Helper: push a timeline entry ─────────────────────────
 const pushTimeline = (complaint, action, user, remark = '') => {
@@ -56,6 +57,20 @@ export const createComplaint = asyncHandler(async (req, res) => {
   // Push first timeline entry
   pushTimeline(complaint, 'Complaint filed by citizen', req.user);
   await complaint.save();
+
+  const io = req.app.get('io');
+
+  // If ward has an assigned officer, notify them
+  if (ward.assignedOfficer) {
+    await createNotification({
+      recipient:        ward.assignedOfficer,
+      type:             'complaint_created',
+      title:            'New Complaint Filed',
+      message:          `A new ${complaint.category} complaint has been filed in your ward: "${complaint.title}"`,
+      relatedComplaint: complaint._id,
+      io,
+    });
+  }
 
   // Populate for response
   await complaint.populate([
@@ -180,6 +195,18 @@ export const updateStatus = asyncHandler(async (req, res) => {
   );
   await complaint.save();
 
+  const io = req.app.get('io');
+
+  // Notify the citizen about the status change
+  await createNotification({
+    recipient:        complaint.citizen,
+    type:             'status_changed',
+    title:            'Complaint Status Updated',
+    message:          `Your complaint "${complaint.title}" is now ${status.replace('_', ' ')}`,
+    relatedComplaint: complaint._id,
+    io,
+  });
+
   res.json({ success: true, message: 'Status updated', complaint });
 });
 
@@ -197,6 +224,28 @@ export const assignComplaint = asyncHandler(async (req, res) => {
   complaint.status     = 'assigned';
   pushTimeline(complaint, 'Complaint assigned to officer', req.user);
   await complaint.save();
+
+  const io = req.app.get('io');
+
+  // Notify the officer who was assigned
+  await createNotification({
+    recipient:        officerId,
+    type:             'complaint_assigned',
+    title:            'Complaint Assigned to You',
+    message:          `You have been assigned complaint: "${complaint.title}"`,
+    relatedComplaint: complaint._id,
+    io,
+  });
+
+  // Also notify the citizen
+  await createNotification({
+    recipient:        complaint.citizen,
+    type:             'complaint_assigned',
+    title:            'Complaint Assigned',
+    message:          `Your complaint "${complaint.title}" has been assigned to an officer`,
+    relatedComplaint: complaint._id,
+    io,
+  });
 
   res.json({ success: true, message: 'Complaint assigned', complaint });
 });

@@ -13,6 +13,7 @@ import User from './models/User.js';
 import { asyncHandler } from './utils/apiError.js';
 import { verifyToken, requireRole } from './middleware/auth.middleware.js';
 import userRoutes from './routes/user.routes.js';
+import notificationRoutes from './routes/notification.routes.js';
 
 const app = express();
 
@@ -54,6 +55,7 @@ app.get('/api/v1/users', verifyToken, requireRole('admin'),
     res.json({ success: true, users });
   })
 );
+app.use('/api/v1/notifications', notificationRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ success: false, message: `Route ${req.method} ${req.path} not found` });

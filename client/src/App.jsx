@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { useAuthStore } from './store/authStore';
 import api from './api/axios';
+import { connectSocket, disconnectSocket } from './utils/socket';
 
 import LoginPage  from './pages/auth/LoginPage';
 import SignupPage from './pages/auth/SignupPage';
@@ -141,8 +142,15 @@ function App() {
 
   useEffect(() => {
     api.post('/auth/refresh')
-      .then(({ data }) => setAuth(data.user, data.accessToken))
+      .then(({ data }) => {
+        setAuth(data.user, data.accessToken);
+        // Connect socket after auth
+        connectSocket(data.user._id);
+      })
       .catch(() => setLoading(false));
+
+    // Disconnect socket on unmount
+    return () => disconnectSocket();
   }, []);
 
   return (

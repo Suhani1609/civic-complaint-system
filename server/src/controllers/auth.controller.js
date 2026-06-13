@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import { ApiError, asyncHandler } from '../utils/apiError.js';
+import { sendWelcomeEmail } from '../utils/email.js';
 import {
   generateAccessToken,
   generateRefreshToken,
@@ -35,6 +36,8 @@ export const signup = asyncHandler(async (req, res) => {
   await user.save();
 
   sendRefreshCookie(res, refreshToken);
+
+  sendWelcomeEmail({ to: user.email, name: user.name }); // non-blocking
 
   res.status(201).json({
     success: true,
