@@ -1,4 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
+import { getWardStats } from '../../api/complaints';
+import { Link } from 'react-router-dom';
 import {
   getOverview,
   getByCategory,
@@ -13,6 +15,8 @@ import {
 } from 'recharts';
 
 const COLORS = ['#7c3aed','#10b981','#f59e0b','#ef4444','#3b82f6','#8b5cf6','#ec4899','#14b8a6'];
+
+const { data: wardStats } = useQuery({ queryKey: ['ward-stats'], queryFn: getWardStats });
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
@@ -161,6 +165,53 @@ const AdminDashboard = () => {
             />
           </LineChart>
         </ResponsiveContainer>
+      </div>
+
+      {/* Top performing wards */}
+      <div className="card p-5">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-sm font-bold text-slate-900">Ward Performance</h2>
+            <p className="text-xs text-slate-400 mt-0.5">Top 5 wards by resolution rate</p>
+          </div>
+          <Link to="/admin/wards" className="text-xs text-violet-600 font-semibold hover:underline">
+            View all →
+          </Link>
+        </div>
+
+        <div className="space-y-3">
+          {(wardStats?.wards || [])
+            .filter(w => w.total > 0)
+            .sort((a, b) => b.resolutionRate - a.resolutionRate)
+            .slice(0, 5)
+            .map(ward => (
+              <div key={ward._id} className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-violet-50 rounded-xl flex items-center justify-center text-xs font-bold text-violet-600 flex-shrink-0">
+                  {ward.wardNumber}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="text-sm font-medium text-slate-900 truncate">{ward.wardName}</p>
+                    <span className="text-xs font-bold text-slate-600 flex-shrink-0 ml-2">
+                      {ward.resolutionRate}%
+                    </span>
+                  </div>
+                  <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-violet-500 rounded-full transition-all"
+                      style={{ width: `${ward.resolutionRate}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+
+          {(wardStats?.wards || []).filter(w => w.total > 0).length === 0 && (
+            <p className="text-sm text-slate-400 text-center py-4">
+              No complaint data yet
+            </p>
+          )}
+        </div>
       </div>
 
     </div>

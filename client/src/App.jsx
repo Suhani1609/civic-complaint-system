@@ -4,6 +4,8 @@ import { useAuthStore } from './store/authStore';
 import api from './api/axios';
 import { connectSocket, disconnectSocket } from './utils/socket';
 
+import InstallPrompt from './components/ui/InstallPrompt';
+
 import LoginPage  from './pages/auth/LoginPage';
 import SignupPage from './pages/auth/SignupPage';
 
@@ -21,6 +23,7 @@ import OfficerComplaints from './pages/officer/OfficerComplaints';
 
 import AdminDashboard   from './pages/admin/AdminDashboard';
 import AdminComplaints  from './pages/admin/AdminComplaints';
+import AdminWards from './pages/admin/AdminWards';
 
 // ── Placeholder for pages not built yet ───────────────────
 const Placeholder = ({ name }) => (
@@ -99,6 +102,7 @@ const DashboardLayout = () => {
 
       {/* Mobile bottom nav */}
       <BottomNav />
+      <InstallPrompt />
     </div>
   );
 };
@@ -194,7 +198,7 @@ function App() {
         <Route path="/admin"                element={<AdminDashboard />} />
         <Route path="/admin/complaints"     element={<AdminComplaints />} />
         <Route path="/admin/officers"       element={<Placeholder name="Officers" />} />
-        <Route path="/admin/wards"          element={<Placeholder name="Wards" />} />
+        <Route path="/admin/wards"          element={<AdminWards />} />
         <Route path="/admin/complaints/:id" element={<ComplaintDetail />} />
       </Route>
 

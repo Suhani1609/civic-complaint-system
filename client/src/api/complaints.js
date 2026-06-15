@@ -55,3 +55,13 @@ export const getWards = async () => {
   const { data } = await api.get('/wards');
   return data;
 };
+
+export const getWardStats = async () => {
+  const { data } = await api.get('/wards/stats');
+  return data;
+};
+
+export const assignOfficerToWard = async (wardId, officerId) => {
+  const { data } = await api.patch(`/wards/${wardId}/officer`, { officerId });
+  return data;
+};
