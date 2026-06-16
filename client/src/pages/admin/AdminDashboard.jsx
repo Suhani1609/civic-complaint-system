@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getWardStats } from '../../api/complaints';
+import { getOfficerStats } from '../../api/complaints';
 import { Link } from 'react-router-dom';
 import {
   getOverview,
@@ -16,8 +17,6 @@ import {
 
 const COLORS = ['#7c3aed','#10b981','#f59e0b','#ef4444','#3b82f6','#8b5cf6','#ec4899','#14b8a6'];
 
-const { data: wardStats } = useQuery({ queryKey: ['ward-stats'], queryFn: getWardStats });
-
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
@@ -33,6 +32,8 @@ const AdminDashboard = () => {
   const { data: byCategory } = useQuery({ queryKey: ['analytics-category'],  queryFn: getByCategory });
   const { data: byStatus }   = useQuery({ queryKey: ['analytics-status'],    queryFn: getByStatus   });
   const { data: monthly }    = useQuery({ queryKey: ['analytics-monthly'],   queryFn: getMonthly    });
+  const { data: wardStats } = useQuery({ queryKey: ['ward-stats'], queryFn: getWardStats });
+  const { data: officerStats } = useQuery({ queryKey: ['officer-stats'], queryFn: getOfficerStats });
 
   const s = overview?.data || {};
 
@@ -209,6 +210,54 @@ const AdminDashboard = () => {
           {(wardStats?.wards || []).filter(w => w.total > 0).length === 0 && (
             <p className="text-sm text-slate-400 text-center py-4">
               No complaint data yet
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Top officers */}
+      <div className="card p-5">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-sm font-bold text-slate-900">Top Officers</h2>
+            <p className="text-xs text-slate-400 mt-0.5">Ranked by complaints resolved</p>
+          </div>
+          <Link to="/admin/officers" className="text-xs text-violet-600 font-semibold hover:underline">
+            View all →
+          </Link>
+        </div>
+
+        <div className="space-y-3">
+          {(officerStats?.officers || [])
+            .filter(o => o.total > 0)
+            .sort((a, b) => b.resolved - a.resolved)
+            .slice(0, 5)
+            .map((officer, i) => (
+              <div key={officer._id} className="flex items-center gap-3">
+                <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-500 flex-shrink-0">
+                  {i + 1}
+                </div>
+                <div className="w-9 h-9 rounded-xl bg-violet-100 flex items-center justify-center text-sm font-bold text-violet-700 flex-shrink-0">
+                  {officer.name[0].toUpperCase()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-slate-900 truncate">{officer.name}</p>
+                  <p className="text-xs text-slate-400">
+                    {officer.ward ? `Ward ${officer.ward.wardNumber}` : 'No ward'}
+                  </p>
+                </div>
+                <div className="text-right flex-shrink-0">
+                  <p className="text-sm font-bold text-emerald-600">{officer.resolved} resolved</p>
+                  {officer.avgRating && (
+                    <p className="text-xs text-slate-400">{officer.avgRating} ⭐</p>
+                  )}
+                </div>
+              </div>
+            ))}
+
+          {(officerStats?.officers || []).filter(o => o.total > 0).length === 0 && (
+            <p className="text-sm text-slate-400 text-center py-4">
+              No officer activity yet
             </p>
           )}
         </div>

@@ -24,6 +24,7 @@ import OfficerComplaints from './pages/officer/OfficerComplaints';
 import AdminDashboard   from './pages/admin/AdminDashboard';
 import AdminComplaints  from './pages/admin/AdminComplaints';
 import AdminWards from './pages/admin/AdminWards';
+import AdminOfficers from './pages/admin/AdminOfficers';
 
 // ── Placeholder for pages not built yet ───────────────────
 const Placeholder = ({ name }) => (
@@ -197,7 +198,7 @@ function App() {
       }>
         <Route path="/admin"                element={<AdminDashboard />} />
         <Route path="/admin/complaints"     element={<AdminComplaints />} />
-        <Route path="/admin/officers"       element={<Placeholder name="Officers" />} />
+        <Route path="/admin/officers"       element={<AdminOfficers />} />
         <Route path="/admin/wards"          element={<AdminWards />} />
         <Route path="/admin/complaints/:id" element={<ComplaintDetail />} />
       </Route>

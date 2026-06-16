@@ -65,3 +65,23 @@ export const assignOfficerToWard = async (wardId, officerId) => {
   const { data } = await api.patch(`/wards/${wardId}/officer`, { officerId });
   return data;
 };
+
+export const getOfficerStats = async () => {
+  const { data } = await api.get('/users/officers/stats');
+  return data;
+};
+
+export const createOfficer = async (payload) => {
+  const { data } = await api.post('/users/officers', payload);
+  return data;
+};
+
+export const toggleOfficerActive = async (id) => {
+  const { data } = await api.patch(`/users/${id}/toggle-active`);
+  return data;
+};
+
+export const reassignOfficerWard = async (id, wardId) => {
+  const { data } = await api.patch(`/users/${id}/ward`, { wardId });
+  return data;
+};
